@@ -15,7 +15,7 @@ pipeline {
         NEXUSIP = '10.0.12.178'
         NEXUSPORT = '8081'
         NEXUS_GRP-REPO = 'vpro-maven-group-24'
-
+    
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "10.0.12.178:8081"
@@ -25,6 +25,9 @@ pipeline {
         ARTVERSION = "${env.BUILD_ID}"
         SONARSERVER = "sonarserver"
         SONERSCANNER = "sonarscanner"
+        registryCredential = 'ecr:eu-west-2:awscreds'
+        appRegistry = '710707055756.dkr.ecr.eu-west-2.amazonaws.com/vprofile-2024'
+        vprofileRegistry = "https://710707055756.dkr.ecr.eu-west-2.amazonaws.com"
     }
 	
     stages{
@@ -124,8 +127,23 @@ pipeline {
                 }
             }
         }
+    stage('Build App Image') {
+        steps {
+            script {
+                dockerImage = docker.build{ appRegistry + ":$BUILD_NUMBER", "./Docker-files/app/multistage"}
+            }
+        }
+    }
 
-
-    
+    stage('Upload App Image') {
+        steps{
+            script {
+                docker.withRegistry( vprofileRegistry, registryCredential) {
+                    dockerImage.push("$BUILD_NUMBER")
+                    dockerImage.push('latest')
+                }
+            }
+        }
+    }
     }
 }
