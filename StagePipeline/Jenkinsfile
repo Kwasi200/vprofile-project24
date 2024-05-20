@@ -158,7 +158,7 @@ pipeline {
             script {
                 docker.withRegistry(vprofileRegistry_1, 'docker-hub-credentials-id') {
                 dockerImage.push("$BUILD_NUMBER")
-               /* dockerImage.push('latest') */
+               
                 }
             }
         }
