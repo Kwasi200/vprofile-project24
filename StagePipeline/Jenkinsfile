@@ -14,7 +14,7 @@ pipeline {
         CENTRAL_REPO = 'vpro-maven-central-24'
         NEXUSIP = '10.0.12.178'
         NEXUSPORT = '8081'
-       /* NEXUS_GRP-REPO = 'vpro-maven-group-24'*/
+       NEXUS_GRP-REPO = 'vpro-maven-group-24'
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "10.0.12.178:8081"
