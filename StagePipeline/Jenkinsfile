@@ -152,13 +152,13 @@ pipeline {
                 dockerImage = docker.build( appRegistry_1 + ":$BUILD_NUMBER", "./Docker-files/app/multistage/" )
             }
         }
-    }
+    } 
     stage('Upload App Image to Docker Hub') {
         steps{
             script {
                 docker.withRegistry(vprofileRegistry_1, 'docker-hub-credentials-id')
                 dockerImage.push("$BUILD_NUMBER")
-                dockerImage.push('latest')
+               /* dockerImage.push('latest') */
             }
         }
     }
