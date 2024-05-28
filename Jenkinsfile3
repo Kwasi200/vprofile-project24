@@ -1,0 +1,73 @@
+/*def COLOR_MAP = [
+    'SUCCESS': 'good', 
+    'FAILURE': 'danger',
+] */
+pipeline {
+    agent any
+       
+    environment {
+        
+        NEXUSPASS = credentials('nexuslogin')
+        CURRENT_TIME = ''
+    }
+
+    stages {
+        state('Setup parameters') {
+            steps {
+                script {
+                    properties([
+                        parameters([
+                            string(
+                                defaultValue: '',
+                                name: 'BUILD',
+                            ), 
+                            string(
+                                defaultValue: '',
+                                name: 'TIME',
+                            )
+                        ])
+                    ])
+                }
+            }
+        }
+        
+
+        stage('Ansible Deploy to Production'){
+            steps {
+                ansiblePlaybook([
+                inventory   : 'ansible/prod.inventory',
+                playbook    : 'ansible/site.yml',
+                installation: 'ansible',
+                colorized   : true,
+			    credentialsId: 'applogin',
+			    disableHostKeyChecking: true,
+                extraVars   : [
+                   	USER: "admin",
+                    /*PASS: "${NEXUSPASS}",*/
+                    PASS: "1010",
+			        nexusip: "10.0.12.178",
+			        reponame: "vprofile-release24",
+			        groupid: "QA",
+			       // time: "${env.CURRENT_TIME}",
+			       // build: "${env.BUILD_ID}",
+                    time: "${env.TIME}",
+			        build: "${env.BUILD}"
+                    artifactid: "vproapp",
+			        vprofile_version: "vproapp-${env.BUILD}-${env.TIME}.war"
+                   
+                    
+                ]
+             ])
+            }
+        }
+
+    }
+   /* post {
+        always {
+            echo 'Slack Notifications.'
+            slackSend channel: '#jenkinscicd',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
+        }
+    } */
+}
