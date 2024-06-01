@@ -74,17 +74,7 @@ pipeline {
               }
             }
         }
-/*
-        stage("Quality Gate") {
-            steps {
-                timeout(time: 3, unit: 'MINUTES') {
-                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
-                    // true = set pipeline to UNSTABLE, false = don't
-                    waitForQualityGate abortPipeline: false 
-                }
-            }
-        }
-*/ 
+
         stage("Set Time") {
             steps {
                 script {
@@ -121,7 +111,8 @@ pipeline {
         }
 
         stage('Deploy to Stage Bean'){
-            steps{withAWS(credentials: 'awsbeancreds', region: 'eu-west-2'){
+            steps {
+                withAWS(credentials: 'awsbeancreds', region: 'eu-west-2') {
                 sh 'aws s3 cp ./target/vprofile-v2.war s3://$AWS_S3_BUCKET/$ARTIFACT_NAME'
                 sh 'aws elasticbeanstalk create-application-version --application-name $AWS_EB_APP_NAME --version-label $AWS_EB_APP_VERSION'
                 sh 'aws elasticbeanstalk update-environment --application-name $AWS_EB_APP_NAME --environment-name $AWS_EB_ENVIRONMENT --version-label $AWS_EB_APP_VERSION'
@@ -130,40 +121,7 @@ pipeline {
         }
         }
 
-        /* stage('Ansible Deploy to staging'){
-            steps {
-                ansiblePlaybook([
-                inventory   : 'ansible/stage.inventory',
-                playbook    : 'ansible/site.yml',
-                installation: 'ansible',
-                colorized   : true,
-			    credentialsId: 'applogin',
-			    disableHostKeyChecking: true,
-                extraVars   : [
-                   	USER: "admin",
-                    /*PASS: "${NEXUSPASS}",
-                    PASS: "1010",
-			        nexusip: "10.0.12.178",
-			        reponame: "vprofile-release24",
-			        groupid: "QA",
-			        time: "${env.CURRENT_TIME}",
-			        build: "${env.BUILD_ID}",
-                    artifactid: "vproapp",
-			        vprofile_version: "vproapp-${env.BUILD_ID}-${env.CURRENT_TIME}.war"
-                   
-                    
-                ]
-             ])
-            }
-        } */
-
+        
     }
-   /* post {
-        always {
-            echo 'Slack Notifications.'
-            slackSend channel: '#jenkinscicd',
-                color: COLOR_MAP[currentBuild.currentResult],
-                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
-        }
-    } */
+   
 }
